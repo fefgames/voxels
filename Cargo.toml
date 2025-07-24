@@ -1,0 +1,13 @@
+[package]
+name = "voxels"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+vulkano = "0.34.0"
+vulkano-shaders = "0.34.0"
+winit = "0.28.0"
+image = "0.24"
+
+[profile.dev]
+opt-level = 1
