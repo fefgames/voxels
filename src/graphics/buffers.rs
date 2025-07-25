@@ -100,13 +100,12 @@ fn get_buffer(memory_allocator: Arc<StandardMemoryAllocator>) -> Subbuffer<[MyVe
 
 }
 
+/// This represents the buffers that are used to store the data for the graphics pipeline.
+/// The staging buffer is used to store the data that is used to create the vertex buffer.
+/// The vertex buffer is used to store the data that is used to draw the graphics.
 pub struct Buffers {
     pub staging_buffer: Subbuffer<[MyVertex]>,
     pub vertex_buffer: Subbuffer<[MyVertex]>,
-    // pub draw_command_buffers: Vec<Arc<PrimaryAutoCommandBuffer>>,
-    // pub copy_command_buffer: Arc<PrimaryAutoCommandBuffer>,
-    // pub command_buffer_allocator: StandardCommandBufferAllocator,
-    // pub queue: Arc<Queue>,
 }
 
 impl Buffers {

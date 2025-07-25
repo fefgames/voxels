@@ -83,6 +83,8 @@ impl App {
 
 
         let mut now = std::time::Instant::now();
+        let mut copy_command_future: Option<FenceSignalFuture<_>> = None;
+        let mut position = 0.0;
         
         state.context.event_loop.run(move |event, _, control_flow| match event {
             Event::WindowEvent {
@@ -102,24 +104,27 @@ impl App {
                 let delta = now.elapsed();
                 if delta.as_secs_f64() > 0.05 {
                     now = std::time::Instant::now();
+                    position += 0.01;
 
-                    match buffers.staging_buffer.write() {
-                        Ok(mut buf) => {
-                            buf.index_mut(0).position[0] += 0.01;
+                    if copy_command_future.is_none() || copy_command_future.as_ref().unwrap().is_signaled().unwrap() {
+                        match buffers.staging_buffer.write() {
+                            Ok(mut buf) => {
+                                buf.index_mut(0).position[0] = position;
+                            }
+                            Err(e) => {
+                                println!("failed to write buffer: {e}");
+                            }
                         }
-                        Err(e) => {
-                            println!("failed to write buffer: {e}");
-                        }
+                        copy_command_future = Some(
+                            buffers.get_copy_command_buffer(&command_buffer_allocator, state.context.queue.clone())
+                            .clone()
+                            .execute(state.context.queue.clone())
+                            .unwrap()
+                            .then_signal_fence_and_flush()
+                            .unwrap()
+                        );
                     }
 
-                    buffers.get_copy_command_buffer(&command_buffer_allocator, state.context.queue.clone())
-                        .clone()
-                        .execute(state.context.queue.clone())
-                        .unwrap()
-                        .then_signal_fence_and_flush()
-                        .unwrap()
-                        .wait(None)
-                        .unwrap();
 
                     
                 }
